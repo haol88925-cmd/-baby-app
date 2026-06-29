@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+.npm-cache/
+
+.DS_Store
+*.log
+*.tmp
+
+.env
+.env.*
+!.env.example

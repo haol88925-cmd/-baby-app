@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "奶爸app",
+    "slug": "naitre-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F3F5F7",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.naitredad.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F3F5F7"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}
