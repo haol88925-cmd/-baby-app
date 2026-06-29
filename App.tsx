@@ -16,7 +16,7 @@ import {
 
 import { colors, radius, spacing, typography } from './src/theme';
 
-type Screen = 'onboarding' | 'home' | 'log' | 'log-detail' | 'profile' | 'profile-edit' | 'profile-photo' | 'feeding-record' | 'diaper-record' | 'medicine-record' | 'sleep-record' | 'knowledge' | 'knowledge-detail' | 'vaccine' | 'vaccine-notice';
+type Screen = 'splash' | 'onboarding' | 'home' | 'log' | 'log-detail' | 'profile' | 'profile-edit' | 'profile-photo' | 'feeding-record' | 'diaper-record' | 'medicine-record' | 'sleep-record' | 'knowledge' | 'knowledge-detail' | 'vaccine' | 'vaccine-notice';
 type QuickCareId = 'feeding' | 'diaper' | 'sleep' | 'medicine';
 type BreastSide = '左侧' | '右侧';
 type SleepMode = '计时' | '手动输入';
@@ -624,6 +624,32 @@ function formatSleepTimer(seconds: number) {
 function WebStatusBar() {
   if (Platform.OS !== 'web') return null;
   return <Image source={require('./assets/ios-status-bar.png')} style={styles.webStatusBar} resizeMode="stretch" />;
+}
+
+function SplashScreen({ onDone }: { onDone: () => void }) {
+  const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setFinished(true), 3840);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="进入引导页"
+      onPress={() => {
+        if (finished) onDone();
+      }}
+      style={styles.splashScreen}
+    >
+      <Image
+        source={finished ? require('./assets/splash-final-frame.png') : require('./assets/splash-animation.gif')}
+        style={styles.splashImage}
+        resizeMode="cover"
+      />
+    </Pressable>
+  );
 }
 
 function ScreenHeader({ title, onBack }: { title: string; onBack: () => void }) {
@@ -3521,7 +3547,7 @@ export default function App() {
   const [careRecords, setCareRecords] = useState<LogEntry[]>(() => loadMockCareRecords());
   const quickItems = useMemo(() => buildQuickCareItems(careRecords), [careRecords]);
   const [selectedNav, setSelectedNav] = useState('home');
-  const [screen, setScreen] = useState<Screen>('onboarding');
+  const [screen, setScreen] = useState<Screen>('splash');
   const [selectedLogEntry, setSelectedLogEntry] = useState<LogEntry>(defaultLogEntry);
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<ProfilePhotoRecord | null>(null);
   const [editingLogEntry, setEditingLogEntry] = useState<LogEntry | null>(null);
@@ -3706,7 +3732,11 @@ export default function App() {
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
       <View style={shellStyle}>
-        <WebStatusBar />
+        {screen !== 'splash' ? <WebStatusBar /> : null}
+
+        {screen === 'splash' ? (
+          <SplashScreen onDone={() => setScreen('onboarding')} />
+        ) : null}
 
         {screen === 'onboarding' ? (
           <OnboardingScreen
@@ -3906,6 +3936,14 @@ const styles = StyleSheet.create({
   webStatusBar: {
     width: '100%',
     height: 44,
+  },
+  splashScreen: {
+    flex: 1,
+    backgroundColor: '#F7FCFF',
+  },
+  splashImage: {
+    width: '100%',
+    height: '100%',
   },
   emptyState: {
     minHeight: 238,
