@@ -134,9 +134,9 @@ type ProfilePhotoRecord = {
 };
 
 const quickCareItems: QuickCareItem[] = [
-  { id: 'feeding', title: '喂食', detail: '母乳80ml · 2小时前', color: colors.feeding, icon: require('./assets/icon-feeding.png') },
+  { id: 'feeding', title: '喂食', detail: '母乳 · 2小时前', color: colors.feeding, icon: require('./assets/icon-feeding.png') },
   { id: 'diaper', title: '臭臭', detail: '小便 · 15分钟前', color: colors.diaper, icon: require('./assets/icon-diaper.png') },
-  { id: 'sleep', title: '睡眠', detail: '母乳80ml · 2小时前', color: colors.sleep, icon: require('./assets/icon-sleep.png') },
+  { id: 'sleep', title: '睡眠', detail: '小睡 · 2小时前', color: colors.sleep, icon: require('./assets/icon-sleep.png') },
   { id: 'medicine', title: '吃药', detail: '维生素D · 2小时前', color: colors.medicine, icon: require('./assets/icon-medicine.png') },
 ];
 
@@ -413,6 +413,22 @@ function formatRelativeMinutes(minutes: number) {
   return `${Math.floor(diff / 60)}小时前`;
 }
 
+function getQuickCareSummary(entry: LogEntry) {
+  if (entry.type === 'feeding') {
+    return getDetailValue(entry, '喂养方式') || entry.detail.split('·')[0]?.trim() || '喂食';
+  }
+  if (entry.type === 'diaper') {
+    return getDetailValue(entry, '类型') || entry.detail.split('·')[0]?.trim() || entry.title;
+  }
+  if (entry.type === 'sleep') {
+    return entry.detail.replace(/\s*\d+.*$/, '').trim() || entry.title;
+  }
+  if (entry.type === 'medicine') {
+    return getDetailValue(entry, '药品') || entry.detail.split('·')[0]?.trim() || entry.title;
+  }
+  return entry.title;
+}
+
 function buildQuickCareItems(records: LogEntry[]) {
   return quickCareItems.map((item) => {
     const typeByQuickId: Record<QuickCareId, LogType> = {
@@ -425,7 +441,7 @@ function buildQuickCareItems(records: LogEntry[]) {
     if (!latest) return item;
     return {
       ...item,
-      detail: `${latest.detail} · ${formatRelativeMinutes(latest.minutes)}`,
+      detail: `${getQuickCareSummary(latest)} · ${formatRelativeMinutes(latest.minutes)}`,
     };
   });
 }
