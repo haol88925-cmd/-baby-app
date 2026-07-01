@@ -646,11 +646,15 @@ function WebStatusBar() {
   return <Image source={require('./assets/ios-status-bar.png')} style={styles.webStatusBar} resizeMode="stretch" />;
 }
 
+function getAssetUri(asset: string | { uri: string }) {
+  return typeof asset === 'string' ? asset : asset.uri;
+}
+
 function SplashScreen({ onDone }: { onDone: () => void }) {
   const [finished, setFinished] = useState(false);
   const [videoReady, setVideoReady] = useState(Platform.OS === 'web');
-  const splashVideoAsset = require('./assets/splash-video.mp4') as { uri: string };
-  const splashPosterAsset = require('./assets/splash-final-frame.png') as { uri: string };
+  const splashVideoUri = getAssetUri(require('./assets/splash-video.mp4'));
+  const splashPosterUri = getAssetUri(require('./assets/splash-final-frame.png'));
 
   useEffect(() => {
     const timer = setTimeout(() => setFinished(true), 4200);
@@ -668,12 +672,12 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
     >
       {Platform.OS === 'web' && !finished && videoReady ? (
         React.createElement('video', {
-          src: splashVideoAsset.uri,
+          src: splashVideoUri,
           autoPlay: true,
           muted: true,
           playsInline: true,
           preload: 'auto',
-          poster: splashPosterAsset.uri,
+          poster: splashPosterUri,
           onEnded: () => setFinished(true),
           onError: () => {
             setVideoReady(false);
