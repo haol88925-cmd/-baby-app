@@ -611,6 +611,10 @@ function addMinutes(date: Date, minutes: number) {
   return new Date(date.getTime() + minutes * 60 * 1000);
 }
 
+function addSeconds(date: Date, seconds: number) {
+  return new Date(date.getTime() + seconds * 1000);
+}
+
 function formatDateTime(date: Date) {
   return `${formatMonthDay(date)} ${formatClock(date)}`;
 }
@@ -1798,7 +1802,7 @@ function DateOnlyPickerSheet({
 function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScreenProps) {
   const [sleepMode, setSleepMode] = useState<SleepMode>(initialEntry?.type === 'sleep' ? '手动输入' : '计时');
   const [sleeping, setSleeping] = useState(false);
-  const [timerCompleted, setTimerCompleted] = useState(false);
+  const [timerStarted, setTimerStarted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [startTime, setStartTime] = useState(() => dateFromRecordTime(getDetailValue(initialEntry, '开始时间'), new Date()));
   const [endTime, setEndTime] = useState(() => {
@@ -1825,25 +1829,28 @@ function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScre
       setStartTime(now);
       setEndTime(now);
       setSleeping(false);
-      setTimerCompleted(false);
+      setTimerStarted(false);
     }
   };
 
   const startTimer = () => {
+    if (timerStarted) {
+      setSleeping(true);
+      notify('睡眠计时已继续');
+      return;
+    }
     const now = new Date();
     setStartTime(now);
     setEndTime(now);
     setElapsedSeconds(0);
-    setTimerCompleted(false);
+    setTimerStarted(true);
     setSleeping(true);
   };
 
-  const finishTimer = () => {
-    const now = new Date();
-    setEndTime(now);
+  const pauseTimer = () => {
+    setEndTime(addSeconds(startTime, elapsedSeconds));
     setSleeping(false);
-    setTimerCompleted(true);
-    notify('睡眠计时已结束');
+    notify('睡眠计时已暂停');
   };
 
   const confirmPicker = (date: Date) => {
@@ -1867,15 +1874,15 @@ function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScre
   };
 
   const saveSleep = () => {
-    if (sleepMode === '计时' && sleeping) {
-      notify('请先结束睡眠计时');
+    if (sleepMode === '计时' && !timerStarted) {
+      notify('请先开始睡眠计时');
       return;
     }
-    if (endTime.getTime() <= startTime.getTime()) {
+    const finalEndTime = sleepMode === '计时' ? addSeconds(startTime, Math.max(1, elapsedSeconds)) : endTime;
+    if (finalEndTime.getTime() <= startTime.getTime()) {
       notify('结束时间不能早于开始时间', 'critical');
       return;
     }
-    const finalEndTime = currentEndTime;
     const duration = formatSleepDuration(startTime, finalEndTime);
     onSaved({
       type: 'sleep',
@@ -1893,9 +1900,10 @@ function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScre
   };
 
   const pickerValue = pickerField === 'end' ? endTime : startTime;
-  const currentEndTime = sleeping ? addMinutes(startTime, Math.floor(elapsedSeconds / 60)) : endTime;
-  const currentDuration = sleeping ? `${Math.max(1, Math.ceil(elapsedSeconds / 60))}分钟` : formatSleepDuration(startTime, endTime);
-  const showTimerDetails = sleeping || timerCompleted;
+  const currentEndTime = sleepMode === '计时' ? addSeconds(startTime, Math.max(1, elapsedSeconds)) : endTime;
+  const currentDuration = sleepMode === '计时' ? formatSleepDuration(startTime, currentEndTime) : formatSleepDuration(startTime, endTime);
+  const showTimerDetails = timerStarted;
+  const timerActionLabel = sleeping ? '暂停一下' : timerStarted ? '继续计时' : '开始睡觉了';
 
   return (
     <>
@@ -1913,21 +1921,21 @@ function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScre
         {sleepMode === '计时' ? (
           <>
             <View style={[styles.sleepCenterStage, showTimerDetails && styles.sleepCenterStageWithDetails]}>
-              <Pressable accessibilityRole="button" accessibilityLabel={sleeping ? '暂停睡眠计时' : '开始睡眠计时'} onPress={sleeping ? finishTimer : startTimer} style={({ pressed }) => [styles.sleepCircleButton, sleeping && styles.sleepCircleButtonActive, pressed && styles.pressed]}>
+              <Pressable accessibilityRole="button" accessibilityLabel={sleeping ? '暂停睡眠计时' : timerStarted ? '继续睡眠计时' : '开始睡眠计时'} onPress={sleeping ? pauseTimer : startTimer} style={({ pressed }) => [styles.sleepCircleButton, sleeping && styles.sleepCircleButtonActive, pressed && styles.pressed]}>
                 <SleepTimerIcon active={sleeping} />
-                <Text style={[styles.sleepCircleText, sleeping && styles.sleepCircleTextActive]}>{sleeping ? '宝宝睡觉中' : '开始睡觉了'}</Text>
+                <Text style={[styles.sleepCircleText, sleeping && styles.sleepCircleTextActive]}>{timerActionLabel}</Text>
               </Pressable>
               {showTimerDetails ? (
                 <View style={styles.sleepElapsedBlock}>
                   <Text style={styles.sleepElapsedLabel}>宝宝已睡</Text>
-                  <Text style={styles.sleepElapsedTime}>{sleeping ? formatSleepTimer(elapsedSeconds) : formatSleepTimer(Math.max(34, elapsedSeconds))}</Text>
+                  <Text style={styles.sleepElapsedTime}>{formatSleepTimer(elapsedSeconds)}</Text>
                 </View>
               ) : null}
             </View>
             {showTimerDetails ? (
               <View style={styles.sleepRecordRows}>
                 <FormRow label="开始时间" value={formatDateTime(startTime)} chevron onPress={() => setPickerField('start')} />
-                {sleeping ? <FormRow label="总时长" value={currentDuration} /> : <FormRow label="结束时间" value={formatDateTime(currentEndTime)} chevron onPress={() => setPickerField('end')} />}
+                {sleeping ? <FormRow label="总时长" value={currentDuration} /> : <FormRow label="结束时间" value={formatDateTime(currentEndTime)} />}
                 {!sleeping ? <FormRow label="备注" value={note || '夜醒、哄睡难、惊跳等'} muted={!note} chevron onPress={() => setNoteOpen(true)} /> : null}
               </View>
             ) : null}
@@ -1943,7 +1951,7 @@ function SleepRecordScreen({ initialEntry, onBack, onSaved, notify }: RecordScre
       </ScrollView>
 
       <Pressable accessibilityRole="button" accessibilityLabel="保存睡眠记录" onPress={saveSleep} style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}>
-        <Text style={styles.saveText}>{sleepMode === '计时' && sleeping ? '结束并保存' : '保存'}</Text>
+        <Text style={styles.saveText}>保存</Text>
       </Pressable>
 
       {pickerField ? <TimePickerSheet title={pickerField === 'start' ? '选择开始时间' : '选择结束时间'} value={pickerValue} onCancel={() => setPickerField(null)} onConfirm={confirmPicker} /> : null}
