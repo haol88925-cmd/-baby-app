@@ -93,6 +93,9 @@ type VaccineItem = {
   id: string;
   age: string;
   title: string;
+  dose: string;
+  protects: string;
+  note?: string;
   planDate: string;
   actualDate?: string;
   completed?: boolean;
@@ -256,13 +259,28 @@ const logFilterOptions: Array<{ label: string; type: LogType }> = [
 ];
 
 const vaccineTimeline: VaccineItem[] = [
-  { id: 'birth-hepb-1', age: '出生', title: '乙肝疫苗 · 第 1/3 针 · 免费', planDate: '2026.11.16', actualDate: '2026.05.16', completed: true },
-  { id: 'month-1-hepb-2', age: '1月龄', title: '乙肝疫苗 · 第 2/3 针 · 免费', planDate: '2026.11.16' },
-  { id: 'month-2-polio-1', age: '2月龄', title: '乙肝疫苗 · 第 2/3 针 · 免费', planDate: '2026.11.16' },
-  { id: 'month-2-dtap-1', age: '2月龄', title: '乙肝疫苗 · 第 2/3 针 · 免费', planDate: '2026.11.16' },
-  { id: 'month-3-dtap-2', age: '3月龄', title: '乙肝疫苗 · 第 2/3 针 · 免费', planDate: '2026.11.16' },
-  { id: 'month-3-polio-2', age: '3月龄', title: '乙肝疫苗 · 第 2/3 针 · 免费', planDate: '2026.11.16' },
-  { id: 'month-6-hepb-3', age: '6月龄', title: '乙肝疫苗 · 第 3/3 针 · 免费', planDate: '2026.11.16' },
+  { id: 'birth-hepb-1', age: '出生', title: '乙肝疫苗', dose: '第 1/3 剂', protects: '预防乙型病毒性肝炎', note: '出生后 24 小时内尽早接种', planDate: '2026.05.16', actualDate: '2026.05.16', completed: true },
+  { id: 'birth-bcg-1', age: '出生', title: '卡介苗', dose: '第 1/1 剂', protects: '预防儿童重症结核病', note: '通常出生后尽早接种', planDate: '2026.05.16', actualDate: '2026.05.16', completed: true },
+  { id: 'month-1-hepb-2', age: '1月龄', title: '乙肝疫苗', dose: '第 2/3 剂', protects: '预防乙型病毒性肝炎', planDate: '2026.06.16' },
+  { id: 'month-2-ipv-1', age: '2月龄', title: '脊灰灭活疫苗', dose: '第 1/2 剂', protects: '预防脊髓灰质炎', note: '后续按程序衔接口服脊灰减毒活疫苗', planDate: '2026.07.16' },
+  { id: 'month-3-ipv-2', age: '3月龄', title: '脊灰灭活疫苗', dose: '第 2/2 剂', protects: '预防脊髓灰质炎', planDate: '2026.08.16' },
+  { id: 'month-3-dtap-1', age: '3月龄', title: '百白破疫苗', dose: '第 1/4 剂', protects: '预防百日咳、白喉、破伤风', planDate: '2026.08.16' },
+  { id: 'month-4-bopv-1', age: '4月龄', title: '脊灰减毒活疫苗', dose: '第 1/2 剂', protects: '预防脊髓灰质炎', note: '口服疫苗，具体禁忌以门诊评估为准', planDate: '2026.09.16' },
+  { id: 'month-4-dtap-2', age: '4月龄', title: '百白破疫苗', dose: '第 2/4 剂', protects: '预防百日咳、白喉、破伤风', planDate: '2026.09.16' },
+  { id: 'month-5-dtap-3', age: '5月龄', title: '百白破疫苗', dose: '第 3/4 剂', protects: '预防百日咳、白喉、破伤风', planDate: '2026.10.16' },
+  { id: 'month-6-hepb-3', age: '6月龄', title: '乙肝疫苗', dose: '第 3/3 剂', protects: '预防乙型病毒性肝炎', planDate: '2026.11.16' },
+  { id: 'month-6-mena-1', age: '6月龄', title: 'A群流脑多糖疫苗', dose: '第 1/2 剂', protects: '预防A群流行性脑脊髓膜炎', planDate: '2026.11.16' },
+  { id: 'month-8-mmr-1', age: '8月龄', title: '麻腮风疫苗', dose: '第 1/2 剂', protects: '预防麻疹、腮腺炎、风疹', planDate: '2027.01.16' },
+  { id: 'month-8-je-1', age: '8月龄', title: '乙脑减毒活疫苗', dose: '第 1/2 剂', protects: '预防流行性乙型脑炎', note: '部分地区或使用乙脑灭活疫苗程序', planDate: '2027.01.16' },
+  { id: 'month-9-mena-2', age: '9月龄', title: 'A群流脑多糖疫苗', dose: '第 2/2 剂', protects: '预防A群流行性脑脊髓膜炎', planDate: '2027.02.16' },
+  { id: 'month-18-dtap-4', age: '18月龄', title: '百白破疫苗', dose: '第 4/4 剂', protects: '预防百日咳、白喉、破伤风', planDate: '2027.11.16' },
+  { id: 'month-18-mmr-2', age: '18月龄', title: '麻腮风疫苗', dose: '第 2/2 剂', protects: '预防麻疹、腮腺炎、风疹', planDate: '2027.11.16' },
+  { id: 'month-18-hepa-1', age: '18月龄', title: '甲肝减毒活疫苗', dose: '第 1/1 剂', protects: '预防甲型病毒性肝炎', note: '部分地区或使用甲肝灭活疫苗程序', planDate: '2027.11.16' },
+  { id: 'year-2-je-2', age: '2岁', title: '乙脑减毒活疫苗', dose: '第 2/2 剂', protects: '预防流行性乙型脑炎', planDate: '2028.05.16' },
+  { id: 'year-3-menac-1', age: '3岁', title: 'A+C群流脑多糖疫苗', dose: '第 1/2 剂', protects: '预防A群、C群流行性脑脊髓膜炎', planDate: '2029.05.16' },
+  { id: 'year-4-bopv-2', age: '4岁', title: '脊灰减毒活疫苗', dose: '第 2/2 剂', protects: '预防脊髓灰质炎', planDate: '2030.05.16' },
+  { id: 'year-6-dt-1', age: '6岁', title: '白破疫苗', dose: '第 1/1 剂', protects: '加强预防白喉、破伤风', planDate: '2032.05.16' },
+  { id: 'year-6-menac-2', age: '6岁', title: 'A+C群流脑多糖疫苗', dose: '第 2/2 剂', protects: '预防A群、C群流行性脑脊髓膜炎', planDate: '2032.05.16' },
 ];
 
 const logEntries = ([
@@ -3322,8 +3340,14 @@ function VaccineCard({
 }) {
   return (
     <View style={styles.vaccineTimelineCard}>
-      <Text style={styles.vaccineCardTitle}>{item.title}</Text>
+      <View style={styles.vaccineCardHeader}>
+        <Text style={styles.vaccineCardTitle}>{item.title}</Text>
+        <Text style={styles.vaccineFreeTag}>免费</Text>
+      </View>
+      <Text style={styles.vaccineCardDose}>{item.dose}</Text>
+      <Text style={styles.vaccineCardProtects}>{item.protects}</Text>
       <Text style={styles.vaccineCardMeta}>{completed ? `实际接种：${date}` : `预计接种：${item.planDate}`}</Text>
+      {item.note ? <Text style={styles.vaccineCardNote}>{item.note}</Text> : null}
       <View style={styles.vaccineCardActions}>
         <Pressable accessibilityRole="button" accessibilityState={{ checked: completed }} onPress={onToggle} style={({ pressed }) => [styles.vaccineStatusButton, pressed && styles.pressed]}>
           <Text style={styles.vaccineStatusText}>{completed ? '已接种' : '未接种'}</Text>
@@ -3556,7 +3580,7 @@ function HomeScreen({
           </View>
           <View style={styles.reminderCopy}>
             <Text style={styles.listTitle}>疫苗提醒</Text>
-            <Text style={styles.metaText}>乙肝疫苗第2剂 · 还有7天</Text>
+            <Text style={styles.metaText}>2月龄脊灰灭活疫苗 · 预计 2026.07.16</Text>
           </View>
         </View>
         <Image source={require('./assets/icon-chevron.png')} style={styles.chevronImage} resizeMode="contain" />
@@ -7044,23 +7068,57 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   vaccineTimelineCard: {
-    minHeight: 124,
+    minHeight: 142,
     borderRadius: 12,
     padding: 12,
     backgroundColor: colors.surface,
     justifyContent: 'center',
     gap: 6,
   },
+  vaccineCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   vaccineCardTitle: {
+    flex: 1,
     fontSize: 13,
     lineHeight: 19.5,
     fontWeight: '600',
     color: colors.textPrimary,
   },
+  vaccineFreeTag: {
+    height: 22,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: '#EAF7EF',
+    color: '#20A35B',
+    fontSize: 11,
+    lineHeight: 22,
+    fontWeight: '600',
+  },
+  vaccineCardDose: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  vaccineCardProtects: {
+    fontSize: 11,
+    lineHeight: 15,
+    color: colors.textSecondary,
+  },
   vaccineCardMeta: {
     fontSize: 11,
     lineHeight: 14.3,
     color: colors.textSecondary,
+  },
+  vaccineCardNote: {
+    fontSize: 10,
+    lineHeight: 14,
+    color: '#8A94A6',
   },
   vaccineCardActions: {
     marginTop: 8,
