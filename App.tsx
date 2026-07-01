@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   ImageSourcePropType,
@@ -648,9 +648,11 @@ function WebStatusBar() {
 
 function SplashScreen({ onDone }: { onDone: () => void }) {
   const [finished, setFinished] = useState(false);
+  const [videoReady, setVideoReady] = useState(Platform.OS === 'web');
+  const splashVideoUri = Image.resolveAssetSource(require('./assets/splash-video.mp4')).uri;
 
   useEffect(() => {
-    const timer = setTimeout(() => setFinished(true), 3840);
+    const timer = setTimeout(() => setFinished(true), 4200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -663,11 +665,28 @@ function SplashScreen({ onDone }: { onDone: () => void }) {
       }}
       style={styles.splashScreen}
     >
-      <Image
-        source={finished ? require('./assets/splash-final-frame.png') : require('./assets/splash-animation.gif')}
-        style={styles.splashImage}
-        resizeMode="cover"
-      />
+      {Platform.OS === 'web' && !finished && videoReady ? (
+        React.createElement('video', {
+          src: splashVideoUri,
+          autoPlay: true,
+          muted: true,
+          playsInline: true,
+          preload: 'auto',
+          poster: Image.resolveAssetSource(require('./assets/splash-final-frame.png')).uri,
+          onEnded: () => setFinished(true),
+          onError: () => {
+            setVideoReady(false);
+            setFinished(true);
+          },
+          style: styles.splashVideo,
+        })
+      ) : (
+        <Image
+          source={finished ? require('./assets/splash-final-frame.png') : require('./assets/splash-animation.gif')}
+          style={styles.splashImage}
+          resizeMode="cover"
+        />
+      )}
     </Pressable>
   );
 }
@@ -3968,6 +3987,11 @@ const styles = StyleSheet.create({
   splashImage: {
     width: '100%',
     height: '100%',
+  },
+  splashVideo: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
   },
   emptyState: {
     minHeight: 238,
